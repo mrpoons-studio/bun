@@ -424,11 +424,8 @@ install_common_software() {
 	install_rosetta
 	install_nodejs
 	install_bun
-
-	if [ "$ci" = "1" ]; then
-		install_tailscale
-		install_buildkite
-	fi
+	install_tailscale
+	install_buildkite
 }
 
 install_nodejs() {
@@ -706,11 +703,15 @@ EOF
 }
 
 install_buildkite() {
+	if ! [ "$ci" = "1" ]; then
+		return
+	fi
+
 	bash="$(require bash)"
 	script=$(download_file "https://raw.githubusercontent.com/buildkite/agent/main/install.sh")
 	execute "$bash" "$script"
 
-	out_dir="$home/.buildkite-agent"
+	out_dir="$HOME/.buildkite-agent"
 	execute_sudo mv -f "$out_dir/bin/buildkite-agent" "/usr/bin/buildkite-agent"
 	execute rm -rf "$out_dir"
 
